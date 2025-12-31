@@ -389,6 +389,58 @@
             -webkit-transition-duration: 0.4s;
             transition-duration: 0.4s;
         }
+
+        /* --- STYLES CHO CHỮ SIGMA MEDIA --- */
+        .sigma-logo {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: "Russo One", arial, sans-serif;
+            font-size: 5vw;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none; /* Cho phép click xuyên qua chữ */
+            transition: opacity 2s ease-in;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            .sigma-logo {
+                font-size: 12vw;
+                top: 15%;
+            }
+        }
+
+        .sigma-logo.active {
+            opacity: 1;
+            visibility: visible;
+            animation: firework-text 2s infinite alternate;
+        }
+
+        @keyframes firework-text {
+            0% {
+                text-shadow: 0 0 10px #ff0043, 0 0 20px #ff0043, 0 0 30px #ff0043, 0 0 40px #ff0043;
+                color: #fff;
+            }
+            33% {
+                text-shadow: 0 0 10px #14fc56, 0 0 20px #14fc56, 0 0 30px #14fc56, 0 0 40px #14fc56;
+                color: #fff;
+            }
+            66% {
+                text-shadow: 0 0 10px #1e7fff, 0 0 20px #1e7fff, 0 0 30px #1e7fff, 0 0 40px #1e7fff;
+                color: #fff;
+            }
+            100% {
+                text-shadow: 0 0 10px #ffbf36, 0 0 20px #ffbf36, 0 0 30px #ffbf36, 0 0 40px #ffbf36;
+                color: #fff;
+            }
+        }
     </style>
 
 </head>
@@ -396,7 +448,6 @@
 <audio id="bg-music" loop>
     <source src="nhac/(6)%20ABBA%20-%20Happy%20New%20Year%20(Video)%20-%20YouTube.mp3" type="audio/mp3">
 </audio>
-<!-- SVG Spritesheet -->
 <div style="height: 0; width: 0; position: absolute; visibility: hidden;">
     <svg xmlns="http://www.w3.org/2000/svg">
         <symbol id="icon-play" viewBox="0 0 24 24">
@@ -420,12 +471,14 @@
     </svg>
 </div>
 
-<!-- App -->
 <div class="container">
     <div id="start-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; color: white; flex-direction: column;">
         <h1>Pháo Hoa Năm Mới</h1>
         <button id="start-btn" style="padding: 15px 30px; font-size: 20px; margin-top: 20px; cursor: pointer; background: #ff0043; color: white; border: none; border-radius: 5px;">BẮT ĐẦU</button>
     </div>
+
+    <div id="sigma-logo" class="sigma-logo">Chúc Sigma media an khang thịnh vượng</div>
+
     <div class="loading-init">
         <div class="loading-init__header"></div>
         <div class="loading-init__status">Loading . . . </div>
@@ -512,6 +565,39 @@
 <script>
     'use strict';
     console.clear();
+    // --- HÀM XỬ LÝ CHỮ ---
+    function getTextPoints(text, font, step) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const fontSize = 100;
+        // Tăng chiều rộng canvas để chứa đủ chữ dài
+        canvas.width = fontSize * text.length * 0.8;
+        canvas.height = fontSize * 1.5;
+
+        // Dùng font Impact để nét dày, pháo hoa nổ đẹp hơn
+        ctx.font = "900 " + fontSize + "px " + (font || "Arial Black, Arial, sans-serif");
+        ctx.fillStyle = "#000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        const points = [];
+
+        for (let y = 0; y < canvas.height; y += step) {
+            for (let x = 0; x < canvas.width; x += step) {
+                const index = (y * canvas.width + x) * 4;
+                if (imageData[index + 3] > 128) {
+                    points.push({
+                        // Tính toán tỷ lệ tọa độ
+                        x: (x - canvas.width / 2) / (fontSize / 5),
+                        y: (y - canvas.height / 2) / (fontSize / 5)
+                    });
+                }
+            }
+        }
+        return points;
+    }
 
 
     const IS_MOBILE = window.innerWidth <= 640;
@@ -1020,6 +1106,7 @@
     }
 
     const crysanthemumShell = (size=1) => {
+
         const glitter = Math.random() < 0.25;
         const singleColor = Math.random() < 0.72;
         const color = singleColor ? randomColor({ limitWhite: true }) : [randomColor(), randomColor({ notSame: true })];
@@ -1044,7 +1131,24 @@
             streamers
         };
     };
+    // Cấu hình riêng cho chữ SIGMA MEDIA
+    const sigmaMediaShell = (size=1) => {
+        // Step = 3: Số càng nhỏ hạt càng dày (đẹp hơn) nhưng máy yếu sẽ lag
+        // Nếu lag, hãy sửa số 3 thành 4 hoặc 5
+        const points = getTextPoints("SIGMA MEDIA", "Impact", 3);
 
+        const color = randomColor();
+
+        return {
+            shellSize: size,
+            color: color,
+            spreadSize: size * 120,
+            starLife: 1800, // Thời gian tồn tại lâu hơn chút để kịp đọc
+            starDensity: 1,
+            specialShape: true,
+            points: points
+        };
+    };
 
     const ghostShell = (size=1) => {
         const shell = crysanthemumShell(size);
@@ -1216,6 +1320,7 @@
 
 
     const shellTypes = {
+        'SIGMA MEDIA': sigmaMediaShell,
         'Random': randomShell,
         'Crackle': crackleShell,
         'Crossette': crossetteShell,
@@ -1252,6 +1357,9 @@
 
             // 4. Ẩn màn hình chờ
             overlay.style.display = 'none';
+
+            // 5. HIỆN CHỮ SIGMA MEDIA
+            document.getElementById('sigma-logo').classList.add('active');
         });
 
         document.querySelector('.loading-init').remove();
@@ -1327,7 +1435,21 @@
     }
 
     function launchShellFromConfig(event) {
-        const shell = new Shell(shellFromConfig(shellSizeSelector()));
+        // --- SỬA ĐOẠN NÀY ---
+        let shellConfig;
+
+        // Nếu là lần đầu tiên (dù là tự động hay click tay)
+        if (isFirstSeq) {
+            shellConfig = sigmaMediaShell(shellSizeSelector());
+            isFirstSeq = false; // Đánh dấu là đã bắn xong quả đầu
+        } else {
+            // Nếu không phải lần đầu, lấy theo cấu hình trong menu
+            shellConfig = shellFromConfig(shellSizeSelector());
+        }
+
+        const shell = new Shell(shellConfig);
+        // --------------------
+
         const w = mainStage.width;
         const h = mainStage.height;
 
@@ -1512,14 +1634,12 @@
     function startSequence() {
         if (isFirstSeq) {
             isFirstSeq = false;
-            if (IS_HEADER) {
-                return seqTwoRandom();
-            }
-            else {
-                const shell = new Shell(crysanthemumShell(shellSizeSelector()));
-                shell.launch(0.5, 0.5);
-                return 2400;
-            }
+            // --- SỬA ĐOẠN NÀY ---
+            // Thay vì gọi crysanthemumShell (cúc đại đóa), ta gọi sigmaMediaShell
+            const shell = new Shell(sigmaMediaShell(shellSizeSelector()));
+            shell.launch(0.5, 0.5); // Bắn vào chính giữa màn hình
+            return 2400; // Thời gian chờ sau khi bắn quả chữ
+            // --------------------
         }
 
         if (finaleSelector()) {
@@ -2113,6 +2233,26 @@
             sparkFreq = sparkFreq / quality;
 
             let firstStar = true;
+            // --- Dán đoạn này vào trong hàm burst, TRÊN dòng const starFactory ---
+            if (this.specialShape && this.points) {
+                // Scale nhỏ lại (2.2) vì chữ SIGMA MEDIA rất dài
+                const scale = 8 * quality;
+
+                this.points.forEach(p => {
+                    Star.add(
+                        x + p.x * scale,
+                        y + p.y * scale,
+                        color || randomColor(),
+                        Math.random() * Math.PI * 2,
+                        0.005, // Tốc độ bay cực chậm để giữ hình dáng chữ
+                        this.starLife + Math.random() * 300
+                    );
+                });
+                BurstFlash.add(x, y, this.spreadSize / 4);
+                soundManager.playSound('burst');
+                return;
+            }
+            // -------------------------------------------------------------------
             const starFactory = (angle, speedMult) => {
                 const standardInitialSpeed = this.spreadSize / 1800;
 
