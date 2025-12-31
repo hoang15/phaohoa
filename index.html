@@ -468,6 +468,45 @@
                 right: 15px;
             }
         }
+        /* --- CSS CHO TỜ TIỀN 500K --- */
+        /* --- CSS MỚI CHO HIỆU ỨNG MƯA TIỀN --- */
+        .money-500k {
+            position: absolute;
+            left: 50%;
+            top: 20px; /* Xuất phát từ trong bao lì xì */
+            width: 80px; /* Kích thước tờ tiền */
+            height: auto;
+            opacity: 0;
+            z-index: -1; /* Nằm sau lì xì */
+            pointer-events: none;
+
+            /* Trạng thái ban đầu: Nhỏ, ở giữa, xoay dọc 90 độ */
+            transform: translateX(-50%) scale(0.3) rotate(90deg);
+
+            /* Gọi animation có tên 'moneyRain' */
+            animation: moneyRain 1.5s ease-out forwards;
+        }
+
+        @keyframes moneyRain {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(0) scale(0.3) rotate(90deg);
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                /* Bay lên cao (-300px), sang ngang theo biến --end-x và xoay theo biến --rot */
+                transform: translateX(calc(-50% + var(--end-x))) translateY(-300px) scale(1) rotate(var(--rot));
+            }
+        }
+
+        /* Class này sẽ được thêm vào bằng JS để kích hoạt hiệu ứng */
+        .fly-out {
+            /* Chạy animation tên là flyOutAnimation trong 2 giây */
+            animation: flyOutAnimation 2s ease-out forwards;
+        }
     </style>
 
 </head>
@@ -1436,6 +1475,46 @@
         renderApp(store.state);
 
         configDidUpdate();
+        // --- SỬA ĐOẠN JS CUỐI HÀM INIT ---
+        const lixiContainer = document.querySelector('.lixi-container');
+
+        // Link ảnh tờ tiền 500k
+        const moneySrc = "https://png.pngtree.com/png-clipart/20231206/original/pngtree-vietnamese-currency-500-000-dong-banknote-currency-photo-png-image_13786178.png";
+
+        if (lixiContainer) {
+            lixiContainer.addEventListener('click', (e) => {
+                soundManager.playSound('lift'); // Tiếng vút
+
+                // Vòng lặp tạo ra 15 tờ tiền
+                for (let i = 0; i < 6; i++) {
+                    const img = document.createElement('img');
+                    img.src = moneySrc;
+                    img.classList.add('money-500k');
+
+                    // Random độ lệch sang trái/phải (từ -150px đến +150px)
+                    const randomX = (Math.random() - 0.5) * 300;
+
+                    // Random góc xoay cuối cùng (xung quanh 90 độ, lệch +/- 45 độ)
+                    const randomRot = 90 + (Math.random() - 0.5) * 90;
+
+                    // Gán biến CSS cho tờ tiền này
+                    img.style.setProperty('--end-x', `${randomX}px`);
+                    img.style.setProperty('--rot', `${randomRot}deg`);
+
+                    // Random thời gian trễ một chút để tiền không bay ra cùng lúc 1 cục
+                    img.style.animationDelay = `${Math.random() * 0.5}s`;
+
+                    // Thêm vào trong thẻ chứa lì xì
+                    lixiContainer.appendChild(img);
+
+                    // Sau 2 giây (khi animation xong) thì xóa thẻ img đi cho nhẹ máy
+                    setTimeout(() => {
+                        img.remove();
+                    }, 2000);
+                }
+            });
+        }
+        // ---------------------------------
     }
 
 
