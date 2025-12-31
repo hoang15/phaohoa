@@ -396,8 +396,9 @@
             top: 10%;
             left: 50%;
             transform: translateX(-50%);
-            font-family: "Russo One", arial, sans-serif;
+            font-family: "Open Sans", sans-serif;
             font-size: 3vw;
+            font-weight: 700;
             color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -439,6 +440,32 @@
             100% {
                 text-shadow: 0 0 10px #ffbf36, 0 0 20px #ffbf36, 0 0 30px #ffbf36, 0 0 40px #ffbf36;
                 color: #fff;
+            }
+        }
+        /* --- THÊM ĐOẠN CSS NÀY VÀO CUỐI THẺ <style> --- */
+        .lixi-container {
+            position: absolute;
+            bottom: 30px; /* Cách mép dưới 30px */
+            right: 30px;  /* Cách mép phải 30px */
+            width: 80px;  /* Chiều rộng của lì xì */
+            height: auto;
+            z-index: 50; /* Đảm bảo nó nổi trên nền pháo hoa */
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5)); /* Tạo bóng đổ cho đẹp */
+            transition: transform 0.3s ease; /* Hiệu ứng mượt khi di chuột vào */
+            cursor: pointer;
+        }
+
+        /* Hiệu ứng lắc lư nhẹ khi di chuột vào lì xì */
+        .lixi-container:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Trên điện thoại nhỏ thì cho nhỏ lại một chút để không che nội dung */
+        @media (max-width: 480px) {
+            .lixi-container {
+                width: 60px;
+                bottom: 15px;
+                right: 15px;
             }
         }
     </style>
@@ -558,6 +585,16 @@
             <button type="button" class="help-modal__close-btn">Close</button>
         </div>
     </div>
+    <div class="lixi-container" title="Lì xì may mắn 2026">
+        <svg viewBox="0 0 100 160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="5" width="90" height="150" rx="8" ry="8" fill="#d71e26" stroke="#ffbf36" stroke-width="3"/>
+            <path d="M 10 40 Q 50 70 90 40" stroke="#ffbf36" stroke-width="3" fill="none"/>
+            <circle cx="50" cy="100" r="30" stroke="#ffbf36" stroke-width="2" fill="none" opacity="0.3"/>
+            <rect x="40" y="90" width="20" height="20" stroke="#ffbf36" stroke-width="2" fill="none" opacity="0.3" transform="rotate(45 50 100)"/>
+            <text x="50%" y="105" dominant-baseline="middle" text-anchor="middle" fill="#ffbf36" font-family="Roboto, sans-serif" font-size="28" font-weight="900" letter-spacing="2">2026</text>
+            <text x="50%" y="25" dominant-baseline="middle" text-anchor="middle" fill="#ffbf36" font-family="Roboto, sans-serif" font-size="8" font-weight="bold">HAPPY NEW YEAR</text>
+        </svg>
+    </div>
 </div>
 <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/329180/fscreen%401.0.1.js'></script>
 <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/329180/Stage%400.1.4.js'></script>
@@ -575,7 +612,7 @@
         canvas.height = fontSize * 1.5;
 
         // Dùng font Impact để nét dày, pháo hoa nổ đẹp hơn
-        ctx.font = "900 " + fontSize + "px " + (font || "Arial Black, Arial, sans-serif");
+        ctx.font = "100 " + fontSize + "px " + (font || "Open Sans, sans-serif");
         ctx.fillStyle = "#000";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
